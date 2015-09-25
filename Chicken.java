@@ -1,9 +1,18 @@
+import java.util.*;
 class Chicken {
 	public static void main(String[]a){
-		int n=a.length, m=a[0].length();
+		if (a.length==0) {
+			Scanner u = new Scanner(System.in);
+			Vector<String> w = new Vector();
+			while (u.hasNextLine())
+				w.add(u.nextLine());
+			a = w.toArray(a);
+		}
+		int n=a.length, m=0;//a[0].length();
 		char[][] r = new char[n][];
 		int i=0,j=0,h=0,p=0,q=0,s=0,t=0,b=0,c=0;
-		for (String k : a) r[i++] = k.toCharArray();
+		for (String k : a) m = (k.length() > m)?k.length():m;
+		for (String k : a) r[i++] = Arrays.copyOf(k.toCharArray(), m);
 
 		// Solve right to left, using DP min-path marking technique. '|' is effectively ignored, it's simply a transit to spaces.
 		int[][][] d = new int[n][m][2];
@@ -14,13 +23,13 @@ class Chicken {
 		for(j=m-1;j>=0;j--){
 			for(i=0;i<n;i++){
 				if (j==m-1) // fill marks for "final" column.
-					d[i][j][1] = r[i][j] - '0';
+					d[i][j][1] = (r[i][j]=='\0'||r[i][j]==' '||r[i][j]=='|'?0:r[i][j] - '0');
 				else {
 					if (r[i][j] == '|') {
 						d[i][j][0] = -1; // these are special case, computed after whole row.
 						continue;
 					}
-					p = (r[i][j]==' '||r[i][j]=='|'?0:r[i][j] - '0');
+					p = (r[i][j]=='\0'||r[i][j]==' '||r[i][j]=='|'?0:r[i][j] - '0');
 					// check each angle.
 					for(h=-1;h<2;h++) {
 						if (i+h < 0||i+h>=n) continue;
@@ -56,15 +65,30 @@ class Chicken {
 				}
 			}
 		}
-		System.out.println("best start: " + b + " cost: " + c);
+		System.out.println("best start: " + (b+1) + " cost: " + c);
 		i=b;
 		j=0;
 		while(j<m) {
-			System.out.print(r[i][j] + " -> ");
-			h=d[i][j][0]-2;
-			if(h>1) i+=h-3;
-			else {i+=h;j++;}
+			if (r[i][j]=='\0')j=m; else {
+				System.out.print(r[i][j] + " -> ");
+				h=d[i][j][0]-2;
+				if(h>1) i+=h-3;
+				else {i+=h;j++;}
+			}
 		}
 		System.out.println(c);
+		i=b;
+		j=0;
+		while(j<m) {
+			if (r[i][j]=='\0')j=m; else {
+				h=d[i][j][0];
+				char u = (h==1?'/':h==2?'-':h==3?'\\':h==4?'^':h==6?',':'?');
+				System.out.print(u+" -> ");
+				h=d[i][j][0]-2;
+				if(h>1) i+=h-3;
+				else {i+=h;j++;}
+			}
+		}
+		System.out.println("across");
 	}
 }
